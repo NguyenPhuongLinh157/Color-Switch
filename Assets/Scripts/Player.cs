@@ -1,16 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour {
+public class Player : MonoBehaviour
+{
 
-	public float jumpForce = 10f;
+    public float jumpForce = 10f;
 
     public GameObject particle;
 
-	public Rigidbody2D rb;
-	public SpriteRenderer sr;
+    public Rigidbody2D rb;
+    public SpriteRenderer sr;
     private bool playStarted;
     public GameObject lostPrompt;
     public static int score;
@@ -25,65 +26,79 @@ public class Player : MonoBehaviour {
     public string[] colorName;
     private int currentColor;
 
-	void Start () {
+    void Start()
+    {
         highScore = PlayerPrefs.GetInt("score", 0);
         isAlive = true;
         score = 0;
         scoreBox = GameObject.Find("ScoreBox").GetComponent<Text>();
-		SetRandomColor();
+        SetRandomColor();
         lostPrompt.SetActive(false);
         playStarted = false;
-	}
-	
-	void Update () {
+    }
+
+    void Update()
+    {
         //at the beginning of scene, till screen is touched, don't wake up player, to remove idle deaths
-        if (!playStarted) {
+        if (!playStarted)
+        {
             rb.Sleep();
-            if (Input.GetButtonDown("Jump") || Input.GetMouseButtonDown(0)) {
+            if (Input.GetButtonDown("Jump") || Input.GetMouseButtonDown(0))
+            {
                 rb.WakeUp();
                 rb.velocity = Vector2.up * jumpForce;
                 playStarted = true;
             }
         }
         //move player if he is alive and then screen is touched
-        if (isAlive) {
-            if (Input.GetButtonDown("Jump") || Input.GetMouseButtonDown(0)) {                  //Input.GetButtonDown("Jump") || <- for development
+        if (isAlive)
+        {
+            if (Input.GetButtonDown("Jump") || Input.GetMouseButtonDown(0))
+            {                  //Input.GetButtonDown("Jump") || <- for development
                 rb.velocity = Vector2.up * jumpForce;
             }
         }
-        
-	}
-	void OnTriggerEnter2D (Collider2D col) {
+
+    }
+    void OnTriggerEnter2D(Collider2D col)
+    {
         //If player goes below screen, game over
-        if (col.tag == "MainCamera" && isAlive) {
+        if (col.tag == "MainCamera" && isAlive)
+        {
             Lost();
             return;
         }
-        if (col.tag == "Star") {
+        if (col.tag == "Star")
+        {
             return;
         }
         //If player touches ColorChanger, change color and then consume it
-        if (col.tag == "ColorChanger") {
-			IncrementColor();
-			Destroy(col.gameObject);
-			return;
-		}
+        if (col.tag == "ColorChanger")
+        {
+            IncrementColor();
+            Destroy(col.gameObject);
+            return;
+        }
         //If player touches wrong color, game over
-        if (col.tag != colorName[currentColor] && isAlive) {
+        if (col.tag != colorName[currentColor] && isAlive)
+        {
             Lost();
             return;
         }
     }
     //When encountering a colorChange object, change color to next one
-    void IncrementColor() {
+    void IncrementColor()
+    {
         currentColor = (currentColor + 1) % 4;
         sr.color = color[currentColor];
-         
+
     }
     //if player loses then show prompt, set values in textBoxes
-    public void Lost() {
+    public void Lost()
+    {
         highScoreCongratulate.SetActive(false);
-        if (score > highScore) {
+        if (score > highScore)
+        {
             highScore = score;
             PlayerPrefs.SetInt("score", score);
             highScoreCongratulate.SetActive(true);
@@ -95,43 +110,48 @@ public class Player : MonoBehaviour {
         main.startColor = color[currentColor];
         gameObject.GetComponent<SpriteRenderer>().enabled = false;
         rb.Sleep();
-        
+
         isAlive = false;
         StartCoroutine(Prompt());
     }
     //show prompt after a short delay
-    private IEnumerator Prompt() {
+    private IEnumerator Prompt()
+    {
         yield return new WaitForSeconds(.7f);
         lostPrompt.SetActive(true);
     }
     //Send score to other apps
-    public void ShareScore() {
+    public void ShareScore()
+    {
         ScoreSubmission.SendScore(score);
     }
     //Start new game
-    public void NewGame() {
+    public void NewGame()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     //Function to change color of player at load scene
-	void SetRandomColor () {
-		int index = Random.Range(0, 4);
-		switch (index) {
-			case 0:
-				currentColor = 0;
-				sr.color = color[currentColor];
-				break;
-			case 1:
-				currentColor = 1;
-				sr.color = color[currentColor];
-				break;
-			case 2:
-				currentColor = 2;
-				sr.color = color[currentColor];
-				break;
-			case 3:
-				currentColor = 3;
-				sr.color = color[currentColor];
-				break;
-		}
-	}
+    void SetRandomColor()
+    {
+        int index = Random.Range(0, 4);
+        switch (index)
+        {
+            case 0:
+                currentColor = 0;
+                sr.color = color[currentColor];
+                break;
+            case 1:
+                currentColor = 1;
+                sr.color = color[currentColor];
+                break;
+            case 2:
+                currentColor = 2;
+                sr.color = color[currentColor];
+                break;
+            case 3:
+                currentColor = 3;
+                sr.color = color[currentColor];
+                break;
+        }
+    }
 }
